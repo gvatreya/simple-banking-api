@@ -1,7 +1,6 @@
 package com.gvatreya.finmidbanking.model;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -12,16 +11,15 @@ import java.util.Date;
  *
  */
 @Entity
-@Data
-@NoArgsConstructor
+@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
 public class Transaction {
 
     @Id
-    private long id; // Primary Key
+    private Long id; // Primary Key
 
     private String transactionUuid;
-    private double value;
-    private long sourceAccountId;
-    private long destAccountId;
+    private Double value;
+    private Long sourceAccountId;
+    private Long destAccountId;
     private Date time;
 }

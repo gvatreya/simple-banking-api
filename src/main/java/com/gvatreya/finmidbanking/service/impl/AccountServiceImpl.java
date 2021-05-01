@@ -1,10 +1,18 @@
 package com.gvatreya.finmidbanking.service.impl;
 
+import com.gvatreya.finmidbanking.controller.AccountController;
 import com.gvatreya.finmidbanking.model.Account;
 import com.gvatreya.finmidbanking.model.dto.AccountDto;
 import com.gvatreya.finmidbanking.repository.AccountRepository;
 import com.gvatreya.finmidbanking.service.AccountService;
+import com.gvatreya.finmidbanking.utils.ValidationResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -15,39 +23,84 @@ import java.util.Optional;
 @Service
 public class AccountServiceImpl implements AccountService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AccountServiceImpl.class);
+
+    @Autowired
+    private Environment env;
+
     @Autowired
     private AccountRepository accountRepository;
 
     @Override
     public AccountDto getAccountDetails(long accountId) {
-        final Optional<Account> byId = accountRepository.findById(1L);
-        System.out.println(accountRepository);
-        System.out.println(byId);
+        if(accountId < 1) {
+            final String errorMessage = String.format("AccountId(%s) cannot be less than 1", accountId);
+            LOG.info(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+        LOG.info(String.format("Fetching accountDetails for %s", accountId));
+        final Optional<Account> byId = accountRepository.findById(accountId);
         final AccountDto accountDto = byId.map(AccountDto::fromModel).orElse(null);
-        System.out.println(accountDto);
+        LOG.debug("Returning: " + accountDto);
         return accountDto;
     }
 
     @Override
     public List<AccountDto> getAllAccounts() {
+        LOG.info("Fetching all accountDetails");
         final List<Account> accounts = accountRepository.findAll();
-        System.out.println("ACCOUNTS:" + StringUtils.collectionToCommaDelimitedString(accounts));
+        LOG.debug("All Accounts: " + StringUtils.collectionToCommaDelimitedString(accounts));
         final List<AccountDto> accountDtos = accounts.stream().map(AccountDto::fromModel).toList();
-        System.out.println("ACCOUNTDTO:" + StringUtils.collectionToCommaDelimitedString(accountDtos));
+        LOG.debug("Returning AccountDtos: " + StringUtils.collectionToCommaDelimitedString(accountDtos));
         return accountDtos;
     }
 
     @Override
     public long createAccount(AccountDto accountDto) {
+
+        final ValidationResponse validationResponse = accountDto.validate();
+
+        if(validationResponse.isValid()) {
+            LOG.info("Creating new account details for: " + accountDto);
+            final Account savedAccount = accountRepository.save(buildAccountForSaving(accountDto));
+            LOG.debug("Created account details: "+ savedAccount);
+            return savedAccount.getAccountId();
+        } else {
+            throw new IllegalArgumentException(StringUtils
+                    .collectionToCommaDelimitedString(validationResponse.getProblems()));
+        }
+    }
+
+    /**
+     * Helper method that builds an {@link Account} from {@link AccountDto}.
+     * The book keeping attributes are set here, and if the environment property
+     * {@code balance.use.default} is set, then the passed in balance is ignored.
+     * @param accountDto Incoming accountDto object
+     * @return {@link Account}
+     */
+    private Account buildAccountForSaving(final AccountDto accountDto){
+
+        final Boolean useDefaultBalance = env.getProperty("balance.use.default", Boolean.class);
+        final Double defaultBalance = env.getProperty("balance.default", Double.class);
+
+        Double balance = accountDto.getBalance();
+
+        // If the env variable to set balance is set, use the default balance
+
+        if(null != useDefaultBalance && null != defaultBalance) {
+            LOG.debug("balance.set.default: " + useDefaultBalance);
+            LOG.debug("balance.default: " + defaultBalance);
+            balance = defaultBalance;
+        }
+
         final Date currentTime = new Date();
-        final Account account = Account.builder()
+        return Account.builder()
                 .accountId(accountDto.getAccountId())
-                .balance(accountDto.getBalance())
+                .balance(balance)
                 .created(currentTime)
                 .updated(currentTime)
                 .build();
-        final Account savedAccount = accountRepository.save(account);
-        System.out.println(savedAccount);
-        return savedAccount.getAccountId();
+
     }
+
 }

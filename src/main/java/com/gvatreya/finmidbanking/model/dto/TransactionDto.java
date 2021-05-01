@@ -1,15 +1,15 @@
 package com.gvatreya.finmidbanking.model.dto;
 
-import lombok.Data;
+import lombok.*;
 
 import java.util.Date;
 
-@Data
+@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
 public class TransactionDto {
 
     private String transactionUuid;
-    private double value;
-    private long sourceAccountId;
-    private long destAccountId;
+    private Double value;
+    private Long sourceAccountId;
+    private Long destAccountId;
     private Date time;
 }
