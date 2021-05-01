@@ -25,31 +25,31 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    @GetMapping("/{id}")
-    @ResponseBody
-    public ResponseEntity<AccountDto> getAccount(@PathVariable("id")final Long accountId) {
-        final AccountDto accountDto = accountService.getAccountDetails(accountId);
-        return new ResponseEntity<>(accountDto, HttpStatus.OK);
-    }
-
-    @GetMapping("/")
+    @GetMapping
     @ResponseBody
     public ResponseEntity<Collection<AccountDto>> getAllAccounts() {
         final List<AccountDto> allAccounts = accountService.getAllAccounts();
         return new ResponseEntity<>(allAccounts, HttpStatus.OK);
     }
 
-    @PostMapping("/")
+    @PostMapping
     @ResponseBody
     public ResponseEntity<Long> createAccount(@RequestBody final AccountDto accountDto) {
         final Long createdAccountId = accountService.createAccount(accountDto);
         return new ResponseEntity<>(createdAccountId, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping
     @ResponseBody
-    public ResponseEntity<Long> updateAccount(@RequestBody final AccountDto accountDto) {
-        final Long createdAccountId = accountService.createAccount(accountDto);
-        return new ResponseEntity<>(createdAccountId, HttpStatus.CREATED);
+    public ResponseEntity<String> updateBalance(@RequestBody final AccountDto accountDto) {
+        accountService.updateBalance(accountDto);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/{id}")
+    @ResponseBody
+    public ResponseEntity<AccountDto> getAccount(@PathVariable("id")final Long accountId) {
+        final AccountDto accountDto = accountService.getAccountDetails(accountId);
+        return new ResponseEntity<>(accountDto, HttpStatus.OK);
     }
 }

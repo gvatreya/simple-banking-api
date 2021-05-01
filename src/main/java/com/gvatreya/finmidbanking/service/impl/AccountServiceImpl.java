@@ -1,6 +1,6 @@
 package com.gvatreya.finmidbanking.service.impl;
 
-import com.gvatreya.finmidbanking.controller.AccountController;
+import com.gvatreya.finmidbanking.exceptions.ApplicationException;
 import com.gvatreya.finmidbanking.model.Account;
 import com.gvatreya.finmidbanking.model.dto.AccountDto;
 import com.gvatreya.finmidbanking.repository.AccountRepository;
@@ -9,13 +9,11 @@ import com.gvatreya.finmidbanking.utils.ValidationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -56,7 +54,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public long createAccount(AccountDto accountDto) {
+    public Long createAccount(AccountDto accountDto) {
 
         final ValidationResponse validationResponse = accountDto.validate();
 
@@ -69,6 +67,26 @@ public class AccountServiceImpl implements AccountService {
             throw new IllegalArgumentException(StringUtils
                     .collectionToCommaDelimitedString(validationResponse.getProblems()));
         }
+    }
+
+    @Override
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void updateBalance(final AccountDto accountDto) {
+
+        final ValidationResponse validationResponse = accountDto.validate();
+
+        if(validationResponse.isValid()) {
+            LOG.info("Updating account's balance: " + accountDto);
+            final int rowsAffected = accountRepository.updateBalance(accountDto.getAccountId(), accountDto.getBalance());
+            LOG.debug("rowsAffected: "+ rowsAffected);
+            if(rowsAffected != 1) {
+                throw new ApplicationException("Updated row count mismatch, expected 1 got " + rowsAffected);
+            }
+        } else {
+            throw new IllegalArgumentException(StringUtils
+                    .collectionToCommaDelimitedString(validationResponse.getProblems()));
+        }
+
     }
 
     /**

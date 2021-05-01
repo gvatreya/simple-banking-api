@@ -12,7 +12,7 @@ import java.util.List;
  * Data transfer object for the model Account
  *
  */
-@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor @ToString
 public class AccountDto {
 
     private Long accountId;
@@ -38,6 +38,10 @@ public class AccountDto {
         if(null == this.accountId) {
             response.setValid(false);
             problems.add("accountId is null");
+        }
+        if(null != this.accountId && this.accountId < 0) {
+            response.setValid(false);
+            problems.add("accountId is negative");
         }
         if(null == this.balance) {
             response.setValid(false);
