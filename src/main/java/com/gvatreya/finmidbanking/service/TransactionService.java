@@ -16,6 +16,7 @@ public interface TransactionService {
      * @return {@code List<Transaction>} where accountId was a participant
      */
     Collection<TransactionDto> getAllTransactionsForAccount(@NonNull final Long accountId);
+
     TransactionDto createTransaction(@NonNull final TransactionDto transactionDto);
 
     /**

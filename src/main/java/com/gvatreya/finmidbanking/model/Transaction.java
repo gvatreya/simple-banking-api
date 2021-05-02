@@ -27,7 +27,7 @@ public class Transaction {
     private Long sourceAccountId;
     @NonNull
     private Long destAccountId;
-    @NonNull
+    @NonNull @Builder.Default
     private Date time = new Date();
 
 }

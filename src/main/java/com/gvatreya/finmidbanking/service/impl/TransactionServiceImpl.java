@@ -20,6 +20,7 @@ import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -56,7 +57,7 @@ public class TransactionServiceImpl implements TransactionService {
         final Collection<Transaction> transactions = transactionRepository.findTransactionsByAccountId(accountId);
         LOG.debug("Transactions: " + StringUtils.collectionToCommaDelimitedString(transactions));
         final Collection<TransactionDto> transactionDtos = transactions.stream()
-                .map(TransactionDto::fromModel).toList();
+                .map(TransactionDto::fromModel).collect(Collectors.toList());
         LOG.debug("TransactionDTOs: " + StringUtils.collectionToCommaDelimitedString(transactionDtos));
         return transactionDtos;
     }
