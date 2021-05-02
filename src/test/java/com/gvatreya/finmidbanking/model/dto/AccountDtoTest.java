@@ -6,10 +6,6 @@ import com.gvatreya.finmidbanking.utils.ValidationResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Date;
-
-import static com.gvatreya.finmidbanking.TestUtility.*;
-
 class AccountDtoTest {
 
     @Test

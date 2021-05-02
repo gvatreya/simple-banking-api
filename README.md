@@ -1,8 +1,26 @@
 # Finmid Banking API
 
-#### Additional Notes
+This project contains the backend written in Java 11(LTS) for a sample Banking application.
+The supported operations are `Account CRUD` and `Transactions`.
 
-##### Create Account API
+### System Requirements
+- Java 11
+- Maven
+
+### Running instructions
+One can run the project by executing the command `./mvnw spring-boot:run` 
+from the directory, where the project is cloned.
+
+To run the tests, one can use the command `./mvnw test`
+
+### API Specification
+The project exposes it's API sepcification using the OpenAPI standards.
+One can access the API doc at `http://<base-url>/swagger-ui.html`.
+For example: `http://localhost:8081/swagger-ui.html`
+
+### Additional Notes
+
+###### Create Account API - Special Case (For other APIs please refer the OpenAPI spec)
 The create accounts API takes the following JSON as input
 ```json
 {
