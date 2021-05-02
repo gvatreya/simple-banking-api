@@ -18,7 +18,7 @@ public class TransactionController {
     @Autowired
     private TransactionService transactionService;
 
-    @GetMapping("/{id}")
+    @GetMapping("/account/{id}")
     @ResponseBody
     public ResponseEntity<Collection<TransactionDto>> getTransactionsForAccount(@PathVariable("id")final Long accountId) {
         final Collection<TransactionDto> allTransactionsForAccount = transactionService.getAllTransactionsForAccount(accountId);

@@ -32,16 +32,12 @@ public class TransactionDto {
      * Helper method that validates the TransactionDto object
      * @return {@link ValidationResponse}
      */
-    public ValidationResponse validate() {
+    public ValidationResponse validateForCreate() {
         final ValidationResponse response = new ValidationResponse();
         // Set true by default
         response.setValid(true);
         final List<String> problems = new ArrayList<>();
 
-        if(null == this.transactionUuid) {
-            response.setValid(false);
-            problems.add("transactionUuid is null");
-        }
         if(null == this.sourceAccountId) {
             response.setValid(false);
             problems.add("sourceAccountId is null");

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -32,7 +33,7 @@ public class AccountServiceImpl implements AccountService {
     private AccountRepository accountRepository;
 
     @Override
-    public AccountDto getAccountDetails(@NonNull long accountId) {
+    public @Nullable AccountDto getAccountDetails(@NonNull long accountId) {
         if(accountId < 1) {
             final String errorMessage = String.format("AccountId(%s) cannot be less than 1", accountId);
             LOG.info(errorMessage);

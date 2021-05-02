@@ -8,11 +8,12 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    Transaction findTransactionsByTransactionUuid(final String transactionUuid);
+    Optional<Transaction> findTransactionsByTransactionUuid(final String transactionUuid);
 
     /**
      * Fetch all transactions where the accountId passed was a participant.

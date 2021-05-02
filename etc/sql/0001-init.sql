@@ -1,7 +1,5 @@
 -- Initial database setup
 
-CREATE SCHEMA IF NOT EXISTS finmid;
-
 CREATE TABLE IF NOT EXISTS finmid_accounts(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     account_id BIGINT,

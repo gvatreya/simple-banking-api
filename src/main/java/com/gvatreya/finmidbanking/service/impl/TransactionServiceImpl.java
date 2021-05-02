@@ -13,12 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -37,12 +39,12 @@ public class TransactionServiceImpl implements TransactionService {
     private Environment environment;
 
     @Override
-    public TransactionDto getTransactionDetails(@NonNull final String transactionUuid) {
+    public @Nullable TransactionDto getTransactionDetails(@NonNull final String transactionUuid) {
         if(StringUtils.hasText(transactionUuid)) {
             LOG.info(String.format("Fetching transactionDetails for %s", transactionUuid));
-            final Transaction transaction = transactionRepository.findTransactionsByTransactionUuid(transactionUuid);
+            final Optional<Transaction> transaction = transactionRepository.findTransactionsByTransactionUuid(transactionUuid);
             LOG.debug("Returning: " + transaction);
-            return TransactionDto.fromModel(transaction);
+            return transaction.map(TransactionDto::fromModel).orElse(null);
         } else {
             throw new IllegalArgumentException("Invalid transactionUuid: " + transactionUuid);
         }
@@ -64,13 +66,17 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional(Transactional.TxType.REQUIRED)
-    public TransactionDto createTransaction(@NonNull final TransactionDto transactionDto) {
+    public @Nullable TransactionDto createTransaction(@NonNull final TransactionDto transactionDto) {
 
-        final ValidationResponse validationResponse = transactionDto.validate();
+        final ValidationResponse validationResponse = transactionDto.validateForCreate();
 
         if (!validationResponse.isValid()) {
             throw new IllegalArgumentException(StringUtils
                     .collectionToCommaDelimitedString(validationResponse.getProblems()));
+        }
+
+        if(transactionDto.getSourceAccountId().equals(transactionDto.getDestAccountId())) {
+            throw new ApplicationException("Source and destination account ids must be different");
         }
 
         // Verify that the source and destination accounts exist
@@ -95,7 +101,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Credit receiver's account
         LOG.info("Crediting amount to account");
-        accountService.creditAccount(transactionDto.getSourceAccountId(), transactionDto.getValue());
+        accountService.creditAccount(transactionDto.getDestAccountId(), transactionDto.getValue());
 
         // Create Transactions record to reflect the transaction
         final Transaction transactionToBeSaved = buildTransactionForSaving(transactionDto);
@@ -114,6 +120,9 @@ public class TransactionServiceImpl implements TransactionService {
         LOG.info("MINIMUM_BALANCE: " + MINIMUM_BALANCE);
 
         final AccountDto accountDto = accountService.getAccountDetails(accountId);
+        if(null == accountDto) {
+            throw new ApplicationException("Failed to fetch details for accountId: " + accountId);
+        }
         LOG.debug("AccountDto: " + accountDto);
         LOG.info(String.format("Current balance is %s in account %s", accountDto.getBalance(), accountDto.getAccountId()));
         LOG.info("Amount to be debited: " + transactionAmount);
