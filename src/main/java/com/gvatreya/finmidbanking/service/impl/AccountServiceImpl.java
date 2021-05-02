@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -30,7 +31,7 @@ public class AccountServiceImpl implements AccountService {
     private AccountRepository accountRepository;
 
     @Override
-    public AccountDto getAccountDetails(long accountId) {
+    public AccountDto getAccountDetails(@NonNull long accountId) {
         if(accountId < 1) {
             final String errorMessage = String.format("AccountId(%s) cannot be less than 1", accountId);
             LOG.info(errorMessage);
@@ -54,7 +55,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Long createAccount(AccountDto accountDto) {
+    public Long createAccount(@NonNull AccountDto accountDto) {
 
         final ValidationResponse validationResponse = accountDto.validate();
 
@@ -71,7 +72,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional(Transactional.TxType.REQUIRED)
-    public void updateBalance(final AccountDto accountDto) {
+    public void updateBalance(@NonNull final AccountDto accountDto) {
 
         final ValidationResponse validationResponse = accountDto.validate();
 
@@ -89,6 +90,38 @@ public class AccountServiceImpl implements AccountService {
 
     }
 
+    @Override
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void debitAccount(@NonNull final Long accountId, @NonNull final Double amountToBeDebited) {
+
+        if(amountToBeDebited < 1 || accountId < 1) {
+            throw new ApplicationException(String.format("AccountId %s and or AmountToBeDebited %s is invalid", accountId, amountToBeDebited));
+        }
+
+        LOG.info(String.format("Debiting %s from account %s ", amountToBeDebited, accountId));
+        final int rowsAffected = accountRepository.debitAccountBalance(accountId, amountToBeDebited);
+        LOG.debug("rowsAffected: "+ rowsAffected);
+        if(rowsAffected != 1) {
+            throw new ApplicationException("Updated row count mismatch, expected 1 got " + rowsAffected);
+        }
+    }
+
+    @Override
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void creditAccount(@NonNull final Long accountId, @NonNull final Double amountToBeCredited) {
+
+        if(amountToBeCredited < 1 || accountId < 1) {
+            throw new ApplicationException(String.format("AccountId %s and or AmountToBeCredited %s is invalid", accountId, amountToBeCredited));
+        }
+
+        LOG.info(String.format("Crediting %s to account %s ", amountToBeCredited, accountId));
+        final int rowsAffected = accountRepository.creditAccountBalance(accountId, amountToBeCredited);
+        LOG.debug("rowsAffected: "+ rowsAffected);
+        if(rowsAffected != 1) {
+            throw new ApplicationException("Updated row count mismatch, expected 1 got " + rowsAffected);
+        }
+    }
+
     /**
      * Helper method that builds an {@link Account} from {@link AccountDto}.
      * The book keeping attributes are set here, and if the environment property
@@ -96,7 +129,7 @@ public class AccountServiceImpl implements AccountService {
      * @param accountDto Incoming accountDto object
      * @return {@link Account}
      */
-    private Account buildAccountForSaving(final AccountDto accountDto){
+    private Account buildAccountForSaving(@NonNull final AccountDto accountDto){
 
         final Boolean useDefaultBalance = env.getProperty("balance.use.default", Boolean.class);
         final Double defaultBalance = env.getProperty("balance.default", Double.class);

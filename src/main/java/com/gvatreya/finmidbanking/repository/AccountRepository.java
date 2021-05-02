@@ -15,4 +15,16 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             "WHERE a.accountId = :accountId ")
     @Modifying
     int updateBalance(@Param("accountId") Long accountId, @Param("newBalance") Double newBalance);
+
+    @Query("UPDATE Account a " +
+            "SET a.balance = (a.balance - :amountToBeDebited), a.updated = CURRENT_TIMESTAMP() " +
+            "WHERE a.accountId = :accountId ")
+    @Modifying
+    int debitAccountBalance(@Param("accountId") Long accountId, @Param("amountToBeDebited") Double amountToBeDebited);
+
+    @Query("UPDATE Account a " +
+            "SET a.balance = (a.balance + :amountToBeCredited), a.updated = CURRENT_TIMESTAMP() " +
+            "WHERE a.accountId = :accountId ")
+    @Modifying
+    int creditAccountBalance(@Param("accountId") Long accountId, @Param("amountToBeCredited") Double amountToBeCredited);
 }
