@@ -36,5 +36,5 @@ public interface AccountService {
      */
     void creditAccount(@NonNull final Long accountId, @NonNull final Double amountToBeCredited);
 
-    boolean existsById(@NonNull final Long accountId);
+    boolean existsByAccountId(@NonNull final Long accountId);
 }

@@ -40,7 +40,7 @@ public class AccountServiceImpl implements AccountService {
             throw new IllegalArgumentException(errorMessage);
         }
         LOG.info(String.format("Fetching accountDetails for %s", accountId));
-        final Optional<Account> byId = accountRepository.findById(accountId);
+        final Optional<Account> byId = accountRepository.findAccountByAccountId(accountId);
         final AccountDto accountDto = byId.map(AccountDto::fromModel).orElse(null);
         LOG.debug("Returning: " + accountDto);
         return accountDto;
@@ -125,9 +125,9 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public boolean existsById(@NonNull final Long accountId) {
+    public boolean existsByAccountId(@NonNull final Long accountId) {
         LOG.info("Verifying if account exists for id: " + accountId);
-        final boolean exists = accountRepository.existsById(accountId);
+        final boolean exists = accountRepository.existsAccountByAccountId(accountId);
         LOG.info("Exists: " + exists);
         return exists;
     }

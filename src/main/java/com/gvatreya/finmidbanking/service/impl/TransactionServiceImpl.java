@@ -75,15 +75,11 @@ public class TransactionServiceImpl implements TransactionService {
                     .collectionToCommaDelimitedString(validationResponse.getProblems()));
         }
 
-        if(transactionDto.getSourceAccountId().equals(transactionDto.getDestAccountId())) {
-            throw new ApplicationException("Source and destination account ids must be different");
-        }
-
         // Verify that the source and destination accounts exist
-        if(!accountService.existsById(transactionDto.getSourceAccountId())) {
+        if(!accountService.existsByAccountId(transactionDto.getSourceAccountId())) {
             throw new ApplicationException(String.format("Source Account with id:%s does not exist.", transactionDto.getSourceAccountId()));
         }
-        if(!accountService.existsById(transactionDto.getDestAccountId())) {
+        if(!accountService.existsByAccountId(transactionDto.getDestAccountId())) {
             throw new ApplicationException(String.format("Destination Account with id:%s does not exist.", transactionDto.getDestAccountId()));
         }
 

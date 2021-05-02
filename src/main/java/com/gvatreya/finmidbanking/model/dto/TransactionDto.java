@@ -1,5 +1,6 @@
 package com.gvatreya.finmidbanking.model.dto;
 
+import com.gvatreya.finmidbanking.exceptions.ApplicationException;
 import com.gvatreya.finmidbanking.model.Transaction;
 import com.gvatreya.finmidbanking.utils.ValidationResponse;
 import lombok.*;
@@ -61,6 +62,10 @@ public class TransactionDto {
         if(null != this.value && this.value < 0) {
             response.setValid(false);
             problems.add("value is negative");
+        }
+        if(null != this.sourceAccountId && this.sourceAccountId.equals(this.destAccountId)) {
+            response.setValid(false);
+            problems.add("Source and destination account ids are same and must be different");
         }
         response.setProblems(problems);
         return response;
