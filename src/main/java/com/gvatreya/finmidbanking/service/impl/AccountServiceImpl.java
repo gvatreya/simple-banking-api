@@ -18,6 +18,7 @@ import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -49,13 +50,13 @@ public class AccountServiceImpl implements AccountService {
         LOG.info("Fetching all accountDetails");
         final List<Account> accounts = accountRepository.findAll();
         LOG.debug("All Accounts: " + StringUtils.collectionToCommaDelimitedString(accounts));
-        final List<AccountDto> accountDtos = accounts.stream().map(AccountDto::fromModel).toList();
+        final List<AccountDto> accountDtos = accounts.stream().map(AccountDto::fromModel).collect(Collectors.toList());
         LOG.debug("Returning AccountDtos: " + StringUtils.collectionToCommaDelimitedString(accountDtos));
         return accountDtos;
     }
 
     @Override
-    public Long createAccount(@NonNull AccountDto accountDto) {
+    public AccountDto createAccount(@NonNull AccountDto accountDto) {
 
         final ValidationResponse validationResponse = accountDto.validate();
 
@@ -63,7 +64,7 @@ public class AccountServiceImpl implements AccountService {
             LOG.info("Creating new account details for: " + accountDto);
             final Account savedAccount = accountRepository.save(buildAccountForSaving(accountDto));
             LOG.debug("Created account details: "+ savedAccount);
-            return savedAccount.getAccountId();
+            return AccountDto.fromModel(savedAccount);
         } else {
             throw new IllegalArgumentException(StringUtils
                     .collectionToCommaDelimitedString(validationResponse.getProblems()));
@@ -120,6 +121,14 @@ public class AccountServiceImpl implements AccountService {
         if(rowsAffected != 1) {
             throw new ApplicationException("Updated row count mismatch, expected 1 got " + rowsAffected);
         }
+    }
+
+    @Override
+    public boolean existsById(@NonNull final Long accountId) {
+        LOG.info("Verifying if account exists for id: " + accountId);
+        final boolean exists = accountRepository.existsById(accountId);
+        LOG.info("Exists: " + exists);
+        return exists;
     }
 
     /**

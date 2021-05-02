@@ -73,6 +73,14 @@ public class TransactionServiceImpl implements TransactionService {
                     .collectionToCommaDelimitedString(validationResponse.getProblems()));
         }
 
+        // Verify that the source and destination accounts exist
+        if(!accountService.existsById(transactionDto.getSourceAccountId())) {
+            throw new ApplicationException(String.format("Source Account with id:%s does not exist.", transactionDto.getSourceAccountId()));
+        }
+        if(!accountService.existsById(transactionDto.getDestAccountId())) {
+            throw new ApplicationException(String.format("Destination Account with id:%s does not exist.", transactionDto.getDestAccountId()));
+        }
+
         // Need to check if the sender's account has sufficient
         // balance to complete the transaction
         final boolean hasSufficientBalance = hasSufficientBalance(transactionDto.getSourceAccountId(), transactionDto.getValue());

@@ -2,9 +2,11 @@ package com.gvatreya.finmidbanking.model;
 
 import lombok.*;
 import org.springframework.lang.NonNull;
-import org.springframework.util.StringUtils;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.util.Date;
 
 /**

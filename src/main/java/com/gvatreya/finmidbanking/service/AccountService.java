@@ -1,7 +1,6 @@
 package com.gvatreya.finmidbanking.service;
 
 import com.gvatreya.finmidbanking.model.dto.AccountDto;
-import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 
 import java.util.List;
@@ -9,8 +8,10 @@ import java.util.List;
 public interface AccountService {
 
     AccountDto getAccountDetails(@NonNull long accountId);
+
     List<AccountDto> getAllAccounts();
-    Long createAccount(@NonNull AccountDto accountDto);
+
+    AccountDto createAccount(@NonNull AccountDto accountDto);
 
     /**
      * This method will update the balance of the account with the
@@ -35,4 +36,5 @@ public interface AccountService {
      */
     void creditAccount(@NonNull final Long accountId, @NonNull final Double amountToBeCredited);
 
+    boolean existsById(@NonNull final Long accountId);
 }
